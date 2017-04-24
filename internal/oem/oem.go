@@ -21,6 +21,7 @@ import (
 	"github.com/coreos/ignition/config/types"
 	"github.com/coreos/ignition/internal/providers"
 	"github.com/coreos/ignition/internal/providers/azure"
+	"github.com/coreos/ignition/internal/providers/cloudstack"
 	"github.com/coreos/ignition/internal/providers/digitalocean"
 	"github.com/coreos/ignition/internal/providers/ec2"
 	"github.com/coreos/ignition/internal/providers/file"
@@ -86,10 +87,6 @@ func init() {
 		fetch: noop.FetchConfig,
 	})
 	configs.Register(Config{
-		name:  "cloudstack",
-		fetch: noop.FetchConfig,
-	})
-	configs.Register(Config{
 		name:  "digitalocean",
 		fetch: digitalocean.FetchConfig,
 		baseConfig: types.Config{
@@ -108,6 +105,18 @@ func init() {
 		name:              "openstack",
 		fetch:             openstack.FetchConfig,
 		defaultUserConfig: types.Config{Systemd: types.Systemd{Units: []types.Unit{userCloudInit("OpenStack", "ec2-compat")}}},
+	})
+	configs.Register(Config{
+		name:              "cloudstack",
+		fetch:             cloudstack.FetchConfig,
+		baseConfig: types.Config{
+			Systemd: types.Systemd{
+				Units: []types.Unit{
+					{Enable: true, Name: "coreos-metadata-sshkeys@.service"},
+					{Enable: true, Name: "coreos-metadata.service"},
+				},
+			},
+		},
 	})
 	configs.Register(Config{
 		name:  "ec2",
